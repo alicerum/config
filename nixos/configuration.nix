@@ -25,16 +25,16 @@
     ";
   };
 
-  nixpkgs.config.allowUnfree = true;
+  # Use the gummiboot efi boot loader.
+  boot.loader.gummiboot.enable = true;
+  boot.loader.efi.canTouchEfiVariables = true;
 
-  # Use the GRUB 2 boot loader.
-  boot.loader.grub.enable = true;
-  boot.loader.grub.version = 2;
-  # Define on which hard drive you want to install Grub.
-  boot.loader.grub.device = "/dev/sda";
+  networking.hostName = "wyvernscave"; # Define your hostname.
+  networking.wireless.enable = true;  # Enables wireless.
 
-  # networking.hostName = "nixos"; # Define your hostname.
-  # networking.wireless.enable = true;  # Enables wireless.
+  networking.extraHosts = ''
+    10.9.130.99 qw-app-t00.qiwi.com
+  '';
 
   # Select internationalisation properties.
   # i18n = {
@@ -43,48 +43,30 @@
   #   defaultLocale = "en_US.UTF-8";
   # };
 
-  time.timeZone = "Europe/Moscow";
-
-  fonts = {
-    enableFontDir = true;
-    enableGhostscriptFonts = true;
-    fonts = with pkgs; [
-      bakoma_ttf cm_unicode
-      corefonts
-      freefont_ttf
-      inconsolata junicode
-      libertine
-      liberation_ttf
-      ubuntu_font_family
-      /* unifont */ vistafonts wqy_microhei wqy_zenhei
-    ];
-  };
-
   # List packages installed in system profile. To search by name, run:
   # -env -qaP | grep wget
   environment.systemPackages = with pkgs; [
     wget
-    sudo
-    gitFull
-    vim
-    maven
-    pulseaudio
-    haskellPlatform.ghc
-    haskellPackages.xmobar
-    haskellPackages.xmonad
-    haskellPackages.xmonadContrib
-    haskellPackages.xmonadExtras
-
-    dmenu
-    terminator
     chromium
+    gitFull
+    pulseaudio
+    sudo
+    bumblebee
+    gl117
 
     oraclejdk7
-    pidgin
+    idea.idea-community
 
-    thunderbird
-    slock
+    dmenu
+    wmname
+    /* gnome3.gdm */
+    terminator
+    pmutils
+
+    skype
   ];
+
+  nixpkgs.config.chromium.enablePepperFlash = true;
 
   # List services that you want to enable:
 
@@ -100,10 +82,39 @@
   services.xserver.xkbOptions = "grp:caps_toggle,grp_led:scroll";
 
   # Enable the KDE Desktop Environment.
+  # services.xserver.desktopManager.kde4.enable = true;
   # services.xserver.displayManager.kdm.enable = true;
-  services.xserver.windowManager.xmonad = {
-    enable = true;
-    enableContribAndExtras = true;
+  services.xserver.desktopManager.xterm.enable = false;
+  services.xserver.windowManager.dwm.enable = true;
+  services.xserver.synaptics.enable = true;
+  services.xserver.videoDrivers = [ "intel" "nvidia" ];
+
+  nixpkgs.config.dwm.patches = [ /home/wv/dwm-config/config.patch ];
+
+  hardware.bumblebee.enable = true;
+
+  nixpkgs.config.allowUnfree = true;
+
+  time.timeZone = "Europe/Moscow";
+
+  fonts = {
+    enableFontDir = true;
+    enableGhostscriptFonts = true;
+    fonts = with pkgs; [
+      bakoma_ttf cm_unicode
+      corefonts
+      freefont_ttf
+      inconsolata junicode
+      libertine
+      liberation_ttf
+      ubuntu_font_family
+      /* unifont */ vistafonts wqy_microhei wqy_zenhei
+      terminus_font
+    ];
+  };
+
+  users.extraGroups = {
+    bumblebee = { };
   };
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
@@ -113,16 +124,15 @@
     createHome = true;
     home = "/home/wv";
     group = "users";
-    extraGroups = [ "wheel" ];
+    extraGroups = [ "wheel" "bumblebee" "video" ];
     shell = "/run/current-system/sw/bin/bash";
   };
 
   environment.variables = {
     NIX_PATH = pkgs.lib.mkOverride 0 [
       "/opt/nixpkgs"
-      "nixpkgs=/opt/nixpkgs" 
+      "nixpkgs=/opt/nixpkgs"
       "nixos-config=/etc/nixos/configuration.nix"
-    ]; 
+    ];
   };
-
 }
