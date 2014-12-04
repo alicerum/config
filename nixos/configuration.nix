@@ -8,6 +8,7 @@
   imports =
     [ # Include the results of the hardware scan.
       ./hardware-configuration.nix
+      <nixos/modules/programs/virtualbox.nix>
     ];
 
   nix = {
@@ -25,15 +26,19 @@
     ";
   };
 
-  # Use the gummiboot efi boot loader.
-  boot.loader.gummiboot.enable = true;
-  boot.loader.efi.canTouchEfiVariables = true;
+  nixpkgs.config.virtualbox.enableExtensionPack = true;
+
+  nixpkgs.config.allowUnfree = true;
 
   networking.hostName = "wyvernscave"; # Define your hostname.
   networking.wireless.enable = true;  # Enables wireless.
 
+  networking.hostName = "i-rum.wallet.local"; # Define your hostname.
   networking.extraHosts = ''
-    10.9.130.99 qw-app-t00.qiwi.com
+    192.30.252.129 github.com
+    192.30.252.137 api.github.com
+    192.30.252.147 codeload.github.com
+    23.235.44.133  assets-cdn.github.com
   '';
 
   # Select internationalisation properties.
@@ -42,58 +47,6 @@
   #   consoleKeyMap = "us";
   #   defaultLocale = "en_US.UTF-8";
   # };
-
-  # List packages installed in system profile. To search by name, run:
-  # -env -qaP | grep wget
-  environment.systemPackages = with pkgs; [
-    wget
-    chromium
-    gitFull
-    pulseaudio
-    sudo
-    bumblebee
-    gl117
-
-    oraclejdk7
-    idea.idea-community
-
-    dmenu
-    wmname
-    /* gnome3.gdm */
-    terminator
-    pmutils
-
-    skype
-  ];
-
-  nixpkgs.config.chromium.enablePepperFlash = true;
-
-  # List services that you want to enable:
-
-  # Enable the OpenSSH daemon.
-  # services.openssh.enable = true;
-
-  # Enable CUPS to print documents.
-  # services.printing.enable = true;
-
-  # Enable the X11 windowing system.
-  services.xserver.enable = true;
-  services.xserver.layout = "us,ru";
-  services.xserver.xkbOptions = "grp:caps_toggle,grp_led:scroll";
-
-  # Enable the KDE Desktop Environment.
-  # services.xserver.desktopManager.kde4.enable = true;
-  # services.xserver.displayManager.kdm.enable = true;
-  services.xserver.desktopManager.xterm.enable = false;
-  services.xserver.windowManager.dwm.enable = true;
-  services.xserver.synaptics.enable = true;
-  services.xserver.videoDrivers = [ "intel" "nvidia" ];
-
-  nixpkgs.config.dwm.patches = [ /home/wv/dwm-config/config.patch ];
-
-  hardware.bumblebee.enable = true;
-
-  nixpkgs.config.allowUnfree = true;
 
   time.timeZone = "Europe/Moscow";
 
@@ -113,8 +66,71 @@
     ];
   };
 
+  # List packages installed in system profile. To search by name, run:
+  # -env -qaP | grep wget
+  environment.systemPackages = with pkgs; [
+    wget
+    sudo
+    sshfsFuse
+    gitFull
+    pulseaudio
+    haskellPackages.ghc
+    haskellPackages.xmonad
+    haskellPackages.xmonadContrib
+    haskellPackages.xmonadExtras
+
+    idea.idea-ultimate
+
+    dmenu
+    wmname
+    /* gnome3.gdm */
+    terminator
+    chromium
+    oraclejdk7
+    pidgin
+
+    thunderbird
+    slock
+    wmname
+
+    x11vnc
+
+    openvpn
+    bind
+  ];
+
+  nixpkgs.config.chromium.enablePepperFlash = true;
+
+  # List services that you want to enable:
+
+  # Enable the OpenSSH daemon.
+  # services.openssh.enable = true;
+
+  # Enable CUPS to print documents.
+  # services.printing.enable = true;
+
+  # Enable the X11 windowing system.
+  services.xserver.enable = true;
+  services.xserver.layout = "us,ru";
+  services.xserver.xkbOptions = "grp:caps_toggle,grp_led:scroll";
+
+  services.sshd.enable = true;
+
+  services.printing.enable = true;
+  services.printing.drivers = [ pkgs.splix ];
+
+  # Enable the KDE Desktop Environment.
+  # services.xserver.desktopManager.kde4.enable = true;
+  # services.xserver.displayManager.kdm.enable = true;
+  # services.xserver.windowManager.xmonad = {
+  #   enable = true;
+  #   enableContribAndExtras = true;
+  # };
+
+  services.xserver.windowManager.dwm.enable = true;
+
   users.extraGroups = {
-    bumblebee = { };
+    vboxusers = { };
   };
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
@@ -124,7 +140,7 @@
     createHome = true;
     home = "/home/wv";
     group = "users";
-    extraGroups = [ "wheel" "bumblebee" "video" ];
+    extraGroups = [ "wheel" "vboxusers" ];
     shell = "/run/current-system/sw/bin/bash";
   };
 
