@@ -30,15 +30,14 @@
 
   nixpkgs.config.allowUnfree = true;
 
-  networking.hostName = "wyvernscave"; # Define your hostname.
-  networking.wireless.enable = true;  # Enables wireless.
+  # Use the GRUB 2 boot loader.
+  boot.loader.grub.enable = true;
+  boot.loader.grub.version = 2;
+  # Define on which hard drive you want to install Grub.
+  boot.loader.grub.device = "/dev/sda";
 
   networking.hostName = "i-rum.wallet.local"; # Define your hostname.
   networking.extraHosts = ''
-    192.30.252.129 github.com
-    192.30.252.137 api.github.com
-    192.30.252.147 codeload.github.com
-    23.235.44.133  assets-cdn.github.com
   '';
 
   # Select internationalisation properties.
@@ -73,6 +72,8 @@
     sudo
     sshfsFuse
     gitFull
+    vim
+    maven
     pulseaudio
     haskellPackages.ghc
     haskellPackages.xmonad
@@ -82,8 +83,6 @@
     idea.idea-ultimate
 
     dmenu
-    wmname
-    /* gnome3.gdm */
     terminator
     chromium
     oraclejdk7
@@ -120,7 +119,6 @@
   services.printing.drivers = [ pkgs.splix ];
 
   # Enable the KDE Desktop Environment.
-  # services.xserver.desktopManager.kde4.enable = true;
   # services.xserver.displayManager.kdm.enable = true;
   # services.xserver.windowManager.xmonad = {
   #   enable = true;
@@ -147,8 +145,9 @@
   environment.variables = {
     NIX_PATH = pkgs.lib.mkOverride 0 [
       "/opt/nixpkgs"
-      "nixpkgs=/opt/nixpkgs"
+      "nixpkgs=/opt/nixpkgs" 
       "nixos-config=/etc/nixos/configuration.nix"
-    ];
+    ]; 
   };
+
 }
